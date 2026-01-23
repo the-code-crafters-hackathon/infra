@@ -25,6 +25,8 @@ get_db_status() {
 cd "$TF_ENV_DIR"
 
 echo "==> Pausing runtime (ALB + ECS services)..."
+echo "==> Initializing Terraform backend (S3)..."
+terraform init -input=false -reconfigure
 terraform apply -auto-approve -var="runtime_enabled=false"
 
 echo "==> Checking RDS state: $DB_IDENTIFIER"
