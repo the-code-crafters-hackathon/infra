@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
+export TF_IN_AUTOMATION=true
 
 # -----------------------------
 # Pause Hackathon Environment

@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
+export TF_IN_AUTOMATION=true
 
 # -----------------------------
 # Resume Hackathon Environment
@@ -31,6 +32,9 @@ aws rds wait db-instance-available \
   --db-instance-identifier "$DB_IDENTIFIER" \
   --region "$AWS_REGION" \
   --no-cli-pager || echo "RDS wait skipped (already available or not yet ready)"
+
+echo "==> Initializing Terraform backend (S3)..."
+terraform init -input=false -reconfigure
 
 echo "==> Enabling runtime (ALB + ECS services)..."
 terraform apply -auto-approve -var="runtime_enabled=true"
