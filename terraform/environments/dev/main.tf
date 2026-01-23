@@ -271,7 +271,13 @@ resource "aws_db_instance" "hackathon" {
 
   db_name  = var.db_name
   username = var.db_username
-  password = var.db_password
+  password = local.db_password_effective
+  lifecycle {
+    ignore_changes = [
+      # Password is sourced from Secrets Manager; avoid unintended rotations via Terraform
+      password
+    ]
+  }
 
   vpc_security_group_ids = [aws_security_group.rds.id]
   db_subnet_group_name   = aws_db_subnet_group.hackathon.name
@@ -300,16 +306,35 @@ resource "aws_secretsmanager_secret" "db" {
   })
 }
 
+# Read the current DB credentials from Secrets Manager to avoid requiring db_password
+# in CI/CD runs (GitHub Actions runners are ephemeral and cannot answer prompts).
+data "aws_secretsmanager_secret_version" "db_current" {
+  secret_id = aws_secretsmanager_secret.db.id
+}
+
+locals {
+  db_secret_current = try(jsondecode(data.aws_secretsmanager_secret_version.db_current.secret_string), {})
+
+  # If var.db_password is provided (bootstrap/rotation), use it; otherwise use the current secret value.
+  db_password_effective = coalesce(var.db_password, try(local.db_secret_current.password, null))
+}
+
 resource "aws_secretsmanager_secret_version" "db" {
   secret_id = aws_secretsmanager_secret.db.id
 
   secret_string = jsonencode({
     username = var.db_username
-    password = var.db_password
+    password = local.db_password_effective
     dbname   = var.db_name
     host     = aws_db_instance.hackathon.address
     port     = aws_db_instance.hackathon.port
   })
+
+  lifecycle {
+    ignore_changes = [
+      secret_string
+    ]
+  }
 
   depends_on = [aws_db_instance.hackathon]
 }

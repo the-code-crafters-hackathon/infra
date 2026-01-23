@@ -25,8 +25,9 @@ variable "db_username" {
 
 variable "db_password" {
   type        = string
-  description = "Master password for the Postgres instance (use TF_VAR_db_password or a non-committed tfvars file)"
+  description = "Master password for the Postgres instance (opcional; se null, usa o valor já existente no Secrets Manager)"
   sensitive   = true
+  default     = null
 }
 
 variable "db_instance_class" {
