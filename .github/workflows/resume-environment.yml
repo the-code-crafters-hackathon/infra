@@ -16,7 +16,7 @@ jobs:
     name: Resume (Dev)
     runs-on: ubuntu-latest
     env:
-      AWS_REGION: us-east-1
+      AWS_REGION: ${{ vars.AWS_REGION }}
       AWS_PAGER: ""
       TF_IN_AUTOMATION: "true"
       TF_INPUT: "false"
@@ -30,7 +30,7 @@ jobs:
       - name: Configure AWS credentials (OIDC)
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: arn:aws:iam::822619186337:role/hackathon-github-actions-infra
+          role-to-assume: ${{ vars.AWS_IAM_ROLE_ARN }}
           aws-region: ${{ env.AWS_REGION }}
 
       - name: Resume environment

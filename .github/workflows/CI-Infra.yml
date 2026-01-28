@@ -10,6 +10,10 @@ permissions:
   contents: read
   pull-requests: write
 
+env:
+  AWS_REGION: ${{ vars.AWS_REGION }}
+  AWS_IAM_ROLE_ARN: ${{ vars.AWS_IAM_ROLE_ARN }}
+
 jobs:
   terraform-plan:
     name: Terraform Plan (dev)
@@ -22,8 +26,8 @@ jobs:
       - name: Configure AWS credentials via OIDC
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: arn:aws:iam::822619186337:role/hackathon-github-actions-infra
-          aws-region: us-east-1
+          role-to-assume: ${{ env.AWS_IAM_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
