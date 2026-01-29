@@ -2,6 +2,10 @@
 *.auto.tfvars
 terraform.tfvars
 
+# Terraform state (never commit)
+*.tfstate
+*.tfstate.*
+
 # Terraform internals
 .terraform/
 .terraform.lock.hcl
