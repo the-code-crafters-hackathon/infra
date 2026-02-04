@@ -93,3 +93,31 @@ variable "github_actions_role_name" {
   description = "IAM role name assumed by GitHub Actions via OIDC"
   default     = "hackathon-github-actions-infra"
 }
+
+############################
+# GitHub Actions OIDC (passwordless) - Application repos
+# - Used by CI/CD pipelines in upload/download/processor repos
+# - Separate roles for plan (PR/branches) and deploy (main)
+############################
+
+variable "github_app_repos" {
+  type        = list(string)
+  description = "GitHub repository names for the application CI/CD (e.g., [\"upload-service\", \"download-service\", \"processor-service\"])."
+  default = [
+    "upload-service",
+    "download-service",
+    "processor-service",
+  ]
+}
+
+variable "github_app_deploy_branch" {
+  type        = string
+  description = "Branch allowed to assume the deploy role for application repos (e.g., main)."
+  default     = "main"
+}
+
+variable "github_actions_apps_deploy_role_name" {
+  type        = string
+  description = "IAM role name assumed by GitHub Actions (apps) via OIDC for deploy/apply (restricted to main)."
+  default     = "hackathon-github-actions-apps-deploy"
+}

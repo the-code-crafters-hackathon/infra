@@ -243,6 +243,43 @@ Esses outputs permitem que os serviços sejam configurados **sem hardcode**, man
 
 ---
 
+## 🚀 CI/CD dos Serviços (GitHub Actions + OIDC)
+
+### Visão geral
+
+- O repositório **infra** cria e mantém a infraestrutura (incluindo ECR/ECS).
+- Os repositórios **upload-service**, **download-service** e **processor-service** fazem o **deploy da aplicação** (build/push da imagem no ECR + atualização do ECS).
+- O deploy usa **OIDC** (GitHub Actions → AWS STS) para assumir uma IAM Role, sem chaves estáticas.
+
+### Quando a imagem vai para o ECR?
+
+- **Pull Request:** testes unitários + SonarQube + build (sem push no ECR).
+- **Merge/push na `main`:** build + **push no ECR** + deploy no ECS.
+
+### Role usada pelos repositórios de aplicação
+
+O Terraform cria uma role compartilhada de deploy para os 3 serviços. Referência:
+
+- Output: `github_actions_apps_deploy_role_arn`
+- Trust policy restrita para:
+  - somente `upload-service`, `download-service`, `processor-service`
+  - somente a branch `main`
+
+### Como configurar nos repositórios de aplicação
+
+Em **cada** repositório de aplicação (Settings → Secrets and variables → Actions → Variables):
+
+- `AWS_REGION` (ex.: `us-east-1`)
+- `AWS_IAM_ROLE_ARN` = valor do output `github_actions_apps_deploy_role_arn`
+
+No workflow de deploy (gatilho em `push` na `main`), usar:
+
+- `aws-actions/configure-aws-credentials@v4` com `role-to-assume: ${{ vars.AWS_IAM_ROLE_ARN }}`
+
+> Dica: PRs não precisam assumir role nenhuma (sem acesso à AWS).
+
+---
+
 ## 🚀 Serviços de Execução e Balanceamento de Carga
 
 Esta seção descreve os serviços de execução da aplicação e o mecanismo de balanceamento de carga adotado na arquitetura, validando o funcionamento ponta a ponta dos microserviços em ambiente cloud.
