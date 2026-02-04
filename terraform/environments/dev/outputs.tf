@@ -328,6 +328,11 @@ output "github_actions_role_arn" {
   value       = aws_iam_role.github_actions_infra.arn
 }
 
+output "github_actions_apps_deploy_role_arn" {
+  description = "IAM role ARN to be assumed by GitHub Actions (application repos) via OIDC for deploy (ECR/ECS)"
+  value       = aws_iam_role.github_actions_apps_deploy.arn
+}
+
 output "github_actions_oidc_provider_arn" {
   description = "OIDC provider ARN (token.actions.githubusercontent.com)"
   value       = aws_iam_openid_connect_provider.github.arn
