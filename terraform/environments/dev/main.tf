@@ -818,6 +818,34 @@ resource "aws_iam_role_policy" "github_actions_apps_deploy" {
         Resource = "*"
       },
       {
+        Sid    = "CloudWatchLogsRead"
+        Effect = "Allow",
+        Action = [
+          "logs:DescribeLogStreams"
+        ],
+        Resource = "*"
+      },
+      {
+        Sid    = "CloudWatchLogsReadEvents"
+        Effect = "Allow",
+        Action = [
+          "logs:GetLogEvents",
+          "logs:FilterLogEvents"
+        ],
+        Resource = [
+          "arn:aws:logs:${var.aws_region}:${data.aws_caller_identity.current.account_id}:log-group:/ecs/*",
+          "arn:aws:logs:${var.aws_region}:${data.aws_caller_identity.current.account_id}:log-group:/ecs/*:log-stream:*"
+        ]
+      },
+      {
+        Sid    = "ELBDescribeTargetHealth"
+        Effect = "Allow",
+        Action = [
+          "elasticloadbalancing:DescribeTargetHealth"
+        ],
+        Resource = "*"
+      },
+      {
         Sid    = "PassEcsRoles"
         Effect = "Allow",
         Action = [
