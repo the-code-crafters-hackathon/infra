@@ -776,7 +776,6 @@ resource "aws_iam_role_policy" "github_actions_apps_deploy" {
     Version = "2012-10-17",
     Statement = [
       {
-        Sid    = "ECRAuth"
         Effect = "Allow",
         Action = [
           "ecr:GetAuthorizationToken"
@@ -784,7 +783,6 @@ resource "aws_iam_role_policy" "github_actions_apps_deploy" {
         Resource = "*"
       },
       {
-        Sid    = "ECRPushPull"
         Effect = "Allow",
         Action = [
           "ecr:BatchCheckLayerAvailability",
@@ -804,7 +802,6 @@ resource "aws_iam_role_policy" "github_actions_apps_deploy" {
         ]
       },
       {
-        Sid    = "ECSDeploy"
         Effect = "Allow",
         Action = [
           "ecs:DescribeClusters",
@@ -818,7 +815,6 @@ resource "aws_iam_role_policy" "github_actions_apps_deploy" {
         Resource = "*"
       },
       {
-        Sid    = "CloudWatchLogsRead"
         Effect = "Allow",
         Action = [
           "logs:DescribeLogStreams"
@@ -826,7 +822,6 @@ resource "aws_iam_role_policy" "github_actions_apps_deploy" {
         Resource = "*"
       },
       {
-        Sid    = "CloudWatchLogsReadEvents"
         Effect = "Allow",
         Action = [
           "logs:GetLogEvents",
@@ -838,7 +833,6 @@ resource "aws_iam_role_policy" "github_actions_apps_deploy" {
         ]
       },
       {
-        Sid    = "ELBDescribeTargetHealth"
         Effect = "Allow",
         Action = [
           "elasticloadbalancing:DescribeTargetHealth"
@@ -846,7 +840,6 @@ resource "aws_iam_role_policy" "github_actions_apps_deploy" {
         Resource = "*"
       },
       {
-        Sid    = "PassEcsRoles"
         Effect = "Allow",
         Action = [
           "iam:PassRole"
