@@ -827,6 +827,34 @@ resource "aws_iam_role_policy" "github_actions_apps_deploy" {
           aws_iam_role.ecs_task_execution.arn,
           aws_iam_role.ecs_task.arn
         ]
+      },
+      {
+        Sid    = "CloudWatchLogsRead"
+        Effect = "Allow",
+        Action = [
+          "logs:DescribeLogStreams"
+        ],
+        Resource = "*"
+      },
+      {
+        Sid    = "CloudWatchLogsGetEvents"
+        Effect = "Allow",
+        Action = [
+          "logs:GetLogEvents"
+        ],
+        Resource = [
+          "${aws_cloudwatch_log_group.upload.arn}:log-stream:*",
+          "${aws_cloudwatch_log_group.download.arn}:log-stream:*",
+          "${aws_cloudwatch_log_group.processor.arn}:log-stream:*"
+        ]
+      },
+      {
+        Sid    = "ElbDescribeTargetHealth"
+        Effect = "Allow",
+        Action = [
+          "elasticloadbalancing:DescribeTargetHealth"
+        ],
+        Resource = "*"
       }
     ]
   })
