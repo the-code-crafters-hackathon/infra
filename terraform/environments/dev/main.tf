@@ -1046,7 +1046,7 @@ resource "aws_ecs_task_definition" "upload" {
         { name = "AWS_REGION", value = var.aws_region },
         { name = "S3_BUCKET", value = aws_s3_bucket.media.bucket },
         { name = "S3_INPUT_PREFIX", value = "input/" },
-        { name = "SQS_QUEUE_URL", value = aws_sqs_queue.jobs.url },
+        { name = "SQS_VIDEO_PROCESSING_QUEUE", value = aws_sqs_queue.jobs.url },
         { name = "COGNITO_USER_POOL_ID", value = aws_cognito_user_pool.this.id },
         { name = "COGNITO_CLIENT_ID", value = aws_cognito_user_pool_client.this.id },
         { name = "COGNITO_ISSUER", value = "https://cognito-idp.${var.aws_region}.amazonaws.com/${aws_cognito_user_pool.this.id}" }
@@ -1169,7 +1169,7 @@ resource "aws_ecs_task_definition" "processor" {
         { name = "S3_BUCKET", value = aws_s3_bucket.media.bucket },
         { name = "S3_INPUT_PREFIX", value = "input/" },
         { name = "S3_OUTPUT_PREFIX", value = "output/" },
-        { name = "SQS_QUEUE_URL", value = aws_sqs_queue.jobs.url }
+        { name = "SQS_VIDEO_PROCESSING_QUEUE", value = aws_sqs_queue.jobs.url }
       ]
 
       secrets = [
