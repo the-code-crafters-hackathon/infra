@@ -296,7 +296,7 @@ output "alb_dns_name" {
 
 output "upload_health_url" {
   description = "Convenience URL for upload health check"
-  value       = var.runtime_enabled ? "http://${aws_lb.this[0].dns_name}/upload/health" : null
+  value       = var.runtime_enabled ? "http://${aws_lb.this[0].dns_name}/health" : null
 }
 
 output "download_health_url" {

@@ -59,6 +59,12 @@ variable "runtime_enabled" {
   default     = true
 }
 
+variable "upload_image_tag" {
+  type        = string
+  description = "Container image tag for upload-service in ECR"
+  default     = "latest"
+}
+
 ############################
 # GitHub Actions OIDC (passwordless) - Infra repo
 ############################

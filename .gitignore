@@ -9,3 +9,7 @@ terraform.tfvars
 # Terraform internals
 .terraform/
 .terraform.lock.hcl
+
+# Terraform plans (temporary binary artifacts)
+*.tfplan
+tfplan*
