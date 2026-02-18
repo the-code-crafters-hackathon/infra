@@ -873,7 +873,9 @@ resource "aws_iam_role_policy" "github_actions_apps_deploy" {
         Sid    = "ElbDescribeTargetHealth"
         Effect = "Allow",
         Action = [
-          "elasticloadbalancing:DescribeTargetHealth"
+          "elasticloadbalancing:DescribeTargetHealth",
+          "elasticloadbalancing:DescribeTargetGroups",
+          "elasticloadbalancing:DescribeLoadBalancers"
         ],
         Resource = "*"
       }
@@ -1029,11 +1031,8 @@ resource "aws_ecs_task_definition" "upload" {
   container_definitions = jsonencode([
     {
       name      = "upload"
-      image     = "hashicorp/http-echo:0.2.3"
+      image     = "${aws_ecr_repository.upload.repository_url}:${var.upload_image_tag}"
       essential = true
-
-      # placeholder que responde em qualquer path, inclusive /health
-      command = ["-listen=:8000", "-text=upload ok"]
 
       portMappings = [
         {
@@ -1286,6 +1285,23 @@ resource "aws_lb_listener" "http" {
 }
 
 # Path rules
+resource "aws_lb_listener_rule" "upload_health" {
+  count        = var.runtime_enabled ? 1 : 0
+  listener_arn = aws_lb_listener.http[0].arn
+  priority     = 5
+
+  action {
+    type             = "forward"
+    target_group_arn = aws_lb_target_group.upload[0].arn
+  }
+
+  condition {
+    path_pattern {
+      values = ["/health", "/health/", "/health/*"]
+    }
+  }
+}
+
 resource "aws_lb_listener_rule" "upload" {
   count        = var.runtime_enabled ? 1 : 0
   listener_arn = aws_lb_listener.http[0].arn
@@ -1327,6 +1343,10 @@ resource "aws_ecs_service" "upload" {
   cluster         = aws_ecs_cluster.this.id
   task_definition = aws_ecs_task_definition.upload.arn
   desired_count   = 1
+
+  lifecycle {
+    ignore_changes = [task_definition]
+  }
 
   launch_type = "FARGATE"
 
