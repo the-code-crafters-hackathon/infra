@@ -59,9 +59,7 @@ resource "aws_vpc" "this" {
 }
 
 resource "aws_internet_gateway" "this" {
-          "elasticloadbalancing:DescribeTargetHealth",
-          "elasticloadbalancing:DescribeTargetGroups",
-          "elasticloadbalancing:DescribeLoadBalancers"
+  vpc_id = aws_vpc.this.id
 
   tags = merge(local.tags, {
     Name = "${local.project_prefix}-igw"
@@ -875,7 +873,9 @@ resource "aws_iam_role_policy" "github_actions_apps_deploy" {
         Sid    = "ElbDescribeTargetHealth"
         Effect = "Allow",
         Action = [
-          "elasticloadbalancing:DescribeTargetHealth"
+          "elasticloadbalancing:DescribeTargetHealth",
+          "elasticloadbalancing:DescribeTargetGroups",
+          "elasticloadbalancing:DescribeLoadBalancers"
         ],
         Resource = "*"
       }
