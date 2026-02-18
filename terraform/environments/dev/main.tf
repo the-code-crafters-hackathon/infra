@@ -1043,7 +1043,9 @@ resource "aws_ecs_task_definition" "upload" {
 
       # Variáveis já no formato que o serviço real vai usar depois
       environment = [
+        { name = "APP_ENV", value = "production" },
         { name = "AWS_REGION", value = var.aws_region },
+        { name = "AWS_S3_BUCKET", value = aws_s3_bucket.media.bucket },
         { name = "S3_BUCKET", value = aws_s3_bucket.media.bucket },
         { name = "S3_INPUT_PREFIX", value = "input/" },
         { name = "SQS_VIDEO_PROCESSING_QUEUE", value = aws_sqs_queue.jobs.url },
