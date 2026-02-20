@@ -256,6 +256,44 @@ Esses outputs permitem que os serviços sejam configurados **sem hardcode**, man
 - **Pull Request:** testes unitários + SonarQube + build (sem push no ECR).
 - **Merge/push na `main`:** build + **push no ECR** + deploy no ECS.
 
+---
+
+## 🧪 Smoke E2E (Upload -> Worker)
+
+Para validar o fluxo fim a fim em ambiente provisionado (ALB + ECS + SQS + RDS), o repositório de infraestrutura agora possui:
+
+- Script: [scripts/smoke-e2e-upload-worker.sh](scripts/smoke-e2e-upload-worker.sh)
+- Workflow manual: [smoke-e2e-services.yml](.github/workflows/smoke-e2e-services.yml)
+
+### O que o smoke valida
+
+1. Resolve URL do ALB (via ECS/ALB)
+2. Faz `health check` da API de upload
+3. Envia um vídeo de teste para `POST /upload/video`
+4. Consulta `GET /upload/videos/{user_id}` até o status do vídeo ser `1`
+5. Falha em timeout ou status `2` (erro de processamento)
+
+### Execução local
+
+Pré-requisitos: `aws`, `curl`, `python3`, `ffmpeg` e credenciais AWS válidas.
+
+```bash
+cd infra
+bash scripts/smoke-e2e-upload-worker.sh
+```
+
+Variáveis opcionais:
+
+- `AWS_REGION`
+- `ALB_NAME`
+- `ALB_DNS`
+- `ECS_CLUSTER_NAME`
+- `ECS_UPLOAD_SERVICE_NAME`
+- `UPLOAD_USER_ID`
+- `UPLOAD_TITLE`
+- `POLL_TIMEOUT_SECONDS`
+- `POLL_INTERVAL_SECONDS`
+
 ### Role usada pelos repositórios de aplicação
 
 O Terraform cria uma role compartilhada de deploy para os 3 serviços. Referência:
