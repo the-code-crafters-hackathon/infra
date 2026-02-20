@@ -1005,6 +1005,15 @@ resource "aws_iam_role_policy" "ecs_task_access" {
           "s3:PutObject"
         ],
         Resource = "${aws_s3_bucket.media.arn}/*"
+      },
+      {
+        Sid    = "SecretsReadAccess",
+        Effect = "Allow",
+        Action = [
+          "secretsmanager:GetSecretValue",
+          "secretsmanager:DescribeSecret"
+        ],
+        Resource = aws_secretsmanager_secret.db.arn
       }
     ]
   })
