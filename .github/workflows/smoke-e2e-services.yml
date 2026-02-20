@@ -1,0 +1,58 @@
+name: Smoke E2E Services
+
+on:
+  workflow_dispatch:
+    inputs:
+      ecs_cluster_name:
+        description: "Nome do ECS Cluster"
+        required: false
+        default: "hackathon-cluster"
+      ecs_upload_service_name:
+        description: "Nome do ECS Service de upload"
+        required: false
+        default: "hackathon-upload"
+      alb_name:
+        description: "Nome do ALB"
+        required: false
+        default: "hackathon-alb"
+
+permissions:
+  id-token: write
+  contents: read
+
+env:
+  AWS_REGION: ${{ vars.AWS_REGION }}
+  AWS_IAM_ROLE_ARN: ${{ vars.AWS_IAM_ROLE_ARN }}
+  ECS_CLUSTER_NAME: ${{ github.event.inputs.ecs_cluster_name }}
+  ECS_UPLOAD_SERVICE_NAME: ${{ github.event.inputs.ecs_upload_service_name }}
+  ALB_NAME: ${{ github.event.inputs.alb_name }}
+
+jobs:
+  smoke-e2e-upload-worker:
+    name: Smoke E2E (Upload -> Worker)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ env.AWS_IAM_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Install FFmpeg
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg
+
+      - name: Run smoke E2E test
+        env:
+          AWS_REGION: ${{ env.AWS_REGION }}
+          ECS_CLUSTER_NAME: ${{ env.ECS_CLUSTER_NAME }}
+          ECS_UPLOAD_SERVICE_NAME: ${{ env.ECS_UPLOAD_SERVICE_NAME }}
+          ALB_NAME: ${{ env.ALB_NAME }}
+        run: |
+          bash scripts/smoke-e2e-upload-worker.sh
