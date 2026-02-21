@@ -13,6 +13,8 @@ TF_ENV_DIR="$ROOT_DIR/terraform/environments/dev"
 
 AWS_REGION="us-east-1"
 DB_IDENTIFIER="hackathon-postgres"
+ECS_CLUSTER_NAME="hackathon-cluster"
+ECS_PROCESSOR_SERVICE_NAME="hackathon-processor"
 
 # Health check (ALB) validation
 HEALTH_TIMEOUT_SECONDS=300
@@ -38,6 +40,14 @@ terraform init -input=false -reconfigure
 
 echo "==> Enabling runtime (ALB + ECS services)..."
 terraform apply -auto-approve -var="runtime_enabled=true"
+
+echo "==> Scaling processor service up (desired=1)..."
+aws ecs update-service \
+  --cluster "$ECS_CLUSTER_NAME" \
+  --service "$ECS_PROCESSOR_SERVICE_NAME" \
+  --desired-count 1 \
+  --region "$AWS_REGION" \
+  --no-cli-pager >/dev/null 2>&1 || echo "Processor service not found"
 
 echo "==> Validating ALB health endpoints..."
 UPLOAD_URL="$(terraform output -raw upload_health_url 2>/dev/null || true)"
