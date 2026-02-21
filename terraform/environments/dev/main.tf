@@ -1419,8 +1419,12 @@ resource "aws_ecs_service" "processor" {
   cluster         = aws_ecs_cluster.this.id
   task_definition = aws_ecs_task_definition.processor.arn
 
-  # Cost control: keep it off by default; set to 1 when testing async flow
-  desired_count = 0
+  # Processor enabled by default for async flow in production-like runtime
+  desired_count = 1
+
+  lifecycle {
+    ignore_changes = [task_definition]
+  }
 
   launch_type = "FARGATE"
 

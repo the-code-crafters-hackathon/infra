@@ -13,6 +13,8 @@ TF_ENV_DIR="$ROOT_DIR/terraform/environments/dev"
 
 AWS_REGION="us-east-1"
 DB_IDENTIFIER="hackathon-postgres"
+ECS_CLUSTER_NAME="hackathon-cluster"
+ECS_PROCESSOR_SERVICE_NAME="hackathon-processor"
 
 get_db_status() {
   aws rds describe-db-instances \
@@ -28,6 +30,14 @@ echo "==> Pausing runtime (ALB + ECS services)..."
 echo "==> Initializing Terraform backend (S3)..."
 terraform init -input=false -reconfigure
 terraform apply -auto-approve -var="runtime_enabled=false"
+
+echo "==> Scaling processor service down (desired=0)..."
+aws ecs update-service \
+  --cluster "$ECS_CLUSTER_NAME" \
+  --service "$ECS_PROCESSOR_SERVICE_NAME" \
+  --desired-count 0 \
+  --region "$AWS_REGION" \
+  --no-cli-pager >/dev/null 2>&1 || echo "Processor service not found or already scaled down"
 
 echo "==> Checking RDS state: $DB_IDENTIFIER"
 DB_STATUS="$(get_db_status)"

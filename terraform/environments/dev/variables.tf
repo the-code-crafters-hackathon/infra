@@ -108,10 +108,11 @@ variable "github_actions_role_name" {
 
 variable "github_app_repos" {
   type        = list(string)
-  description = "GitHub repository names for the application CI/CD (e.g., [\"upload-service\", \"download-service\", \"processor-service\"])."
+  description = "GitHub repository names for the application CI/CD (e.g., [\"upload-service\", \"download-service\", \"worker-service\"])."
   default = [
     "upload-service",
     "download-service",
+    "worker-service",
     "processor-service",
   ]
 }
