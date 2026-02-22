@@ -385,6 +385,26 @@ resource "aws_sqs_queue" "jobs" {
 }
 
 ############################
+# SNS (Hackathon) - Alertas de falha no processamento
+############################
+
+resource "aws_sns_topic" "processing_alerts" {
+  name = "${local.project_prefix}-processing-alerts"
+
+  tags = merge(local.tags, {
+    Name = "${local.project_prefix}-processing-alerts"
+  })
+}
+
+resource "aws_sns_topic_subscription" "processing_alerts_email" {
+  count = trimspace(var.processing_alert_email) != "" ? 1 : 0
+
+  topic_arn = aws_sns_topic.processing_alerts.arn
+  protocol  = "email"
+  endpoint  = trimspace(var.processing_alert_email)
+}
+
+############################
 # S3 (Hackathon) - Media bucket
 # - Stores input and output artifacts
 ############################
@@ -1014,6 +1034,14 @@ resource "aws_iam_role_policy" "ecs_task_access" {
           "secretsmanager:DescribeSecret"
         ],
         Resource = aws_secretsmanager_secret.db.arn
+      },
+      {
+        Sid    = "SNSPublishProcessingAlerts",
+        Effect = "Allow",
+        Action = [
+          "sns:Publish"
+        ],
+        Resource = aws_sns_topic.processing_alerts.arn
       }
     ]
   })
@@ -1169,7 +1197,8 @@ resource "aws_ecs_task_definition" "processor" {
         { name = "S3_INPUT_PREFIX", value = "input/" },
         { name = "S3_OUTPUT_PREFIX", value = "output/" },
         { name = "DB_SECRET_NAME", value = aws_secretsmanager_secret.db.arn },
-        { name = "SQS_VIDEO_PROCESSING_QUEUE", value = aws_sqs_queue.jobs.url }
+        { name = "SQS_VIDEO_PROCESSING_QUEUE", value = aws_sqs_queue.jobs.url },
+        { name = "PROCESSING_NOTIFICATIONS_TOPIC_ARN", value = aws_sns_topic.processing_alerts.arn }
       ]
 
       logConfiguration = {

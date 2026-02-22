@@ -126,6 +126,15 @@ output "jobs_dlq_arn" {
 }
 
 ############################################
+# Outputs - SNS
+############################################
+
+output "processing_alerts_topic_arn" {
+  description = "SNS topic ARN for processing failure alerts"
+  value       = aws_sns_topic.processing_alerts.arn
+}
+
+############################################
 # Outputs - S3
 ############################################
 
