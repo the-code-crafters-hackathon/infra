@@ -77,6 +77,12 @@ variable "processor_image_tag" {
   default     = "latest"
 }
 
+variable "processing_alert_email" {
+  type        = string
+  description = "Email para receber alertas de falha no processamento (SNS). Deixe vazio para desativar assinatura por email."
+  default     = ""
+}
+
 ############################
 # GitHub Actions OIDC (passwordless) - Infra repo
 ############################
