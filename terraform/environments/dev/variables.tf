@@ -65,6 +65,18 @@ variable "upload_image_tag" {
   default     = "latest"
 }
 
+variable "download_image_tag" {
+  type        = string
+  description = "Container image tag for download-service in ECR"
+  default     = "latest"
+}
+
+variable "processor_image_tag" {
+  type        = string
+  description = "Container image tag for processor-service in ECR"
+  default     = "latest"
+}
+
 ############################
 # GitHub Actions OIDC (passwordless) - Infra repo
 ############################
