@@ -1066,7 +1066,7 @@ resource "aws_ecs_task_definition" "upload" {
       # Secret do DB injetado pelo ECS (execution role precisa ter GetSecretValue)
       secrets = [
         {
-          name      = "DB_SECRET"
+          name      = "DB_SECRET_NAME"
           valueFrom = aws_secretsmanager_secret.db.arn
         }
       ]
@@ -1129,7 +1129,7 @@ resource "aws_ecs_task_definition" "download" {
 
       secrets = [
         {
-          name      = "DB_SECRET"
+          name      = "DB_SECRET_NAME"
           valueFrom = aws_secretsmanager_secret.db.arn
         }
       ]
@@ -1185,7 +1185,7 @@ resource "aws_ecs_task_definition" "processor" {
 
       secrets = [
         {
-          name      = "DB_SECRET"
+          name      = "DB_SECRET_NAME"
           valueFrom = aws_secretsmanager_secret.db.arn
         }
       ]
