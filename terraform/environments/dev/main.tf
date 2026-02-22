@@ -1020,10 +1020,10 @@ resource "aws_iam_role_policy" "ecs_task_access" {
 }
 
 ############################
-# ECS Task Definition (Upload) - Placeholder image
+# ECS Task Definition (Upload)
 # - Define COMO o container roda (não onde/quantos)
-# - Usa o log group /ecs/hackathon/upload
-# - Expõe porta 8000 para o ALB no passo seguinte
+# - Usa imagem dinâmica no ECR por tag
+# - Expõe porta 8000 para o ALB
 ############################
 
 resource "aws_ecs_task_definition" "upload" {
@@ -1081,8 +1081,9 @@ resource "aws_ecs_task_definition" "upload" {
 }
 
 ############################
-# ECS Task Definition (Download) - Placeholder image
-# - Exposes port 8000 for ALB target groups later
+# ECS Task Definition (Download)
+# - Usa imagem dinâmica no ECR por tag
+# - Exposes port 8000 for ALB target groups
 ############################
 
 resource "aws_ecs_task_definition" "download" {
@@ -1099,10 +1100,8 @@ resource "aws_ecs_task_definition" "download" {
   container_definitions = jsonencode([
     {
       name      = "download"
-      image     = "hashicorp/http-echo:0.2.3"
+      image     = "${aws_ecr_repository.download.repository_url}:${var.download_image_tag}"
       essential = true
-
-      command = ["-listen=:8000", "-text=download ok"]
 
       portMappings = [
         {
@@ -1140,9 +1139,9 @@ resource "aws_ecs_task_definition" "download" {
 }
 
 ############################
-# ECS Task Definition (Processor) - Placeholder worker
-# - No inbound; consumes SQS in the real implementation
-# - Placeholder just logs periodically
+# ECS Task Definition (Processor)
+# - No inbound; consumes SQS
+# - Usa imagem dinâmica no ECR por tag
 ############################
 
 resource "aws_ecs_task_definition" "processor" {
@@ -1159,10 +1158,8 @@ resource "aws_ecs_task_definition" "processor" {
   container_definitions = jsonencode([
     {
       name      = "processor"
-      image     = "busybox:stable"
+      image     = "${aws_ecr_repository.processor.repository_url}:${var.processor_image_tag}"
       essential = true
-
-      command = ["sh", "-c", "while true; do echo processor alive; sleep 30; done"]
 
       environment = [
         { name = "APP_ENV", value = "production" },
@@ -1374,6 +1371,10 @@ resource "aws_ecs_service" "download" {
   cluster         = aws_ecs_cluster.this.id
   task_definition = aws_ecs_task_definition.download.arn
   desired_count   = 1
+
+  lifecycle {
+    ignore_changes = [task_definition]
+  }
 
   launch_type = "FARGATE"
 
