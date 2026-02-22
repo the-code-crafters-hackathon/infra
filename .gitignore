@@ -13,3 +13,7 @@ terraform.tfvars
 # Terraform plans (temporary binary artifacts)
 *.tfplan
 tfplan*
+
+# Smoke outputs and evidences generated locally
+outputs/
+inputs/

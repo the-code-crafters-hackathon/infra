@@ -258,20 +258,21 @@ Esses outputs permitem que os serviços sejam configurados **sem hardcode**, man
 
 ---
 
-## 🧪 Smoke E2E (Upload -> Worker)
+## 🧪 Smoke E2E (Auth Runtime)
 
-Para validar o fluxo fim a fim em ambiente provisionado (ALB + ECS + SQS + RDS), o repositório de infraestrutura agora possui:
+Para validar o fluxo fim a fim em ambiente provisionado (ALB + ECS + SQS + RDS), o repositório de infraestrutura usa:
 
-- Script: [scripts/smoke-e2e-upload-worker.sh](scripts/smoke-e2e-upload-worker.sh)
+- Script oficial (com JWT): [scripts/smoke-e2e-auth-full-flow.sh](scripts/smoke-e2e-auth-full-flow.sh)
+- Script de upload local/legado (sem JWT): `upload-service/tests/smoke/smoke-e2e-upload-worker.sh`
 - Workflow manual: [smoke-e2e-services.yml](.github/workflows/smoke-e2e-services.yml)
 
 ### O que o smoke valida
 
-1. Resolve URL do ALB (via ECS/ALB)
-2. Faz `health check` da API de upload
-3. Envia um vídeo de teste para `POST /upload/video`
+1. Cria usuário de smoke no Cognito e obtém JWT
+2. Valida que upload sem token retorna `401`
+3. Faz upload autenticado para `POST /upload/video`
 4. Consulta `GET /upload/videos/{user_id}` até o status do vídeo ser `1`
-5. Falha em timeout ou status `2` (erro de processamento)
+5. Valida `GET /download/videos/{user_id}` com token
 
 ### Execução local
 
@@ -279,7 +280,7 @@ Pré-requisitos: `aws`, `curl`, `python3`, `ffmpeg` e credenciais AWS válidas.
 
 ```bash
 cd infra
-bash scripts/smoke-e2e-upload-worker.sh
+bash scripts/smoke-e2e-auth-full-flow.sh
 ```
 
 Variáveis opcionais:
@@ -289,10 +290,10 @@ Variáveis opcionais:
 - `ALB_DNS`
 - `ECS_CLUSTER_NAME`
 - `ECS_UPLOAD_SERVICE_NAME`
-- `UPLOAD_USER_ID`
-- `UPLOAD_TITLE`
-- `POLL_TIMEOUT_SECONDS`
-- `POLL_INTERVAL_SECONDS`
+- `POOL`
+- `CLIENT`
+- `ALB`
+- `PASS`
 
 ### Role usada pelos repositórios de aplicação
 
