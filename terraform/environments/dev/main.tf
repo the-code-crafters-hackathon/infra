@@ -1057,18 +1057,11 @@ resource "aws_ecs_task_definition" "upload" {
         { name = "AWS_S3_BUCKET", value = aws_s3_bucket.media.bucket },
         { name = "S3_BUCKET", value = aws_s3_bucket.media.bucket },
         { name = "S3_INPUT_PREFIX", value = "input/" },
+        { name = "DB_SECRET_NAME", value = aws_secretsmanager_secret.db.arn },
         { name = "SQS_VIDEO_PROCESSING_QUEUE", value = aws_sqs_queue.jobs.url },
         { name = "COGNITO_USER_POOL_ID", value = aws_cognito_user_pool.this.id },
         { name = "COGNITO_CLIENT_ID", value = aws_cognito_user_pool_client.this.id },
         { name = "COGNITO_ISSUER", value = "https://cognito-idp.${var.aws_region}.amazonaws.com/${aws_cognito_user_pool.this.id}" }
-      ]
-
-      # Secret do DB injetado pelo ECS (execution role precisa ter GetSecretValue)
-      secrets = [
-        {
-          name      = "DB_SECRET_NAME"
-          valueFrom = aws_secretsmanager_secret.db.arn
-        }
       ]
 
       logConfiguration = {
@@ -1121,17 +1114,13 @@ resource "aws_ecs_task_definition" "download" {
       environment = [
         { name = "AWS_REGION", value = var.aws_region },
         { name = "S3_BUCKET", value = aws_s3_bucket.media.bucket },
+        { name = "AWS_S3_BUCKET", value = aws_s3_bucket.media.bucket },
+        { name = "APP_ENV", value = "production" },
+        { name = "DB_SECRET_NAME", value = aws_secretsmanager_secret.db.arn },
         { name = "S3_OUTPUT_PREFIX", value = "output/" },
         { name = "COGNITO_USER_POOL_ID", value = aws_cognito_user_pool.this.id },
         { name = "COGNITO_CLIENT_ID", value = aws_cognito_user_pool_client.this.id },
         { name = "COGNITO_ISSUER", value = "https://cognito-idp.${var.aws_region}.amazonaws.com/${aws_cognito_user_pool.this.id}" }
-      ]
-
-      secrets = [
-        {
-          name      = "DB_SECRET_NAME"
-          valueFrom = aws_secretsmanager_secret.db.arn
-        }
       ]
 
       logConfiguration = {
@@ -1176,18 +1165,14 @@ resource "aws_ecs_task_definition" "processor" {
       command = ["sh", "-c", "while true; do echo processor alive; sleep 30; done"]
 
       environment = [
+        { name = "APP_ENV", value = "production" },
         { name = "AWS_REGION", value = var.aws_region },
+        { name = "AWS_S3_BUCKET", value = aws_s3_bucket.media.bucket },
         { name = "S3_BUCKET", value = aws_s3_bucket.media.bucket },
         { name = "S3_INPUT_PREFIX", value = "input/" },
         { name = "S3_OUTPUT_PREFIX", value = "output/" },
+        { name = "DB_SECRET_NAME", value = aws_secretsmanager_secret.db.arn },
         { name = "SQS_VIDEO_PROCESSING_QUEUE", value = aws_sqs_queue.jobs.url }
-      ]
-
-      secrets = [
-        {
-          name      = "DB_SECRET_NAME"
-          valueFrom = aws_secretsmanager_secret.db.arn
-        }
       ]
 
       logConfiguration = {
