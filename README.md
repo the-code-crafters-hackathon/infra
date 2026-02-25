@@ -256,6 +256,31 @@ Esses outputs permitem que os serviços sejam configurados **sem hardcode**, man
 - **Pull Request:** testes unitários + SonarQube + build (sem push no ECR).
 - **Merge/push na `main`:** build + **push no ECR** + deploy no ECS.
 
+### Estratégia com tag `latest` (mantida)
+
+Para manter a estratégia de tag `latest` com comportamento previsível no ECS, após publicar nova imagem no ECR execute rollout forçado do serviço para garantir novo pull da imagem:
+
+```bash
+AWS_PAGER='' aws ecs update-service \
+  --cluster hackathon-cluster \
+  --service hackathon-upload \
+  --region us-east-1 \
+  --force-new-deployment
+```
+
+Validação rápida após o deploy:
+
+```bash
+AWS_PAGER='' aws ecs describe-services \
+  --cluster hackathon-cluster \
+  --services hackathon-upload \
+  --region us-east-1 \
+  --query 'services[0].{taskDefinition:taskDefinition,runningCount:runningCount,deployments:deployments[*].rolloutState}' \
+  --output json
+```
+
+> Esse passo evita drift quando a task definition continua a mesma, mas a tag `latest` foi atualizada no ECR.
+
 ---
 
 ## 🧪 Smoke E2E (Auth Runtime)
